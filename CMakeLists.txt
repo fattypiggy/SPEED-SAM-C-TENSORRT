@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.18)
 project(speed-sam LANGUAGES CXX CUDA)
 
-# 设置C++标准（继承自父项目）
+# Set C++ standard (inherited from parent project)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# 确保使用父项目定义的路径
+# Ensure using paths defined by parent project
 if(NOT TENSORRT_ROOT)
     set(TENSORRT_ROOT "C:/dev/TensorRT-8.6.1.6" CACHE PATH "Path to TensorRT installation")
 endif()
@@ -17,16 +17,16 @@ endif()
 message(STATUS "SPEED-SAM using TensorRT at: ${TENSORRT_ROOT}")
 message(STATUS "SPEED-SAM using OpenCV at: ${OpenCV_DIR}")
 
-# 查找CUDA
+# Find CUDA
 find_package(CUDA REQUIRED)
 
-# 查找OpenCV
+# Find OpenCV
 find_package(OpenCV REQUIRED)
 if(NOT OpenCV_FOUND)
     message(FATAL_ERROR "OpenCV not found in speed-sam submodule. Please verify OpenCV_DIR: ${OpenCV_DIR}")
 endif()
 
-# 设置TensorRT路径
+# Set TensorRT paths
 find_path(TENSORRT_INCLUDE_DIR NvInfer.h 
     PATHS ${TENSORRT_ROOT}/include 
     NO_DEFAULT_PATH)
@@ -43,23 +43,23 @@ if(NOT TENSORRT_INCLUDE_DIR OR NOT NVINFER_LIBRARY OR NOT NVONNXPARSER_LIBRARY)
     message(FATAL_ERROR "Required TensorRT libraries not found. Verify TENSORRT_ROOT: ${TENSORRT_ROOT}")
 endif()
 
-# 创建静态库
+# Create static library
 add_library(SpeedSAM STATIC)
 
-# 设置源文件
+# Set source files
 file(GLOB SOURCES 
     ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
 )
 
-# 设置头文件
+# Set header files
 file(GLOB HEADERS 
     ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
 )
 
-# 添加源文件和头文件到库
+# Add source and header files to library
 target_sources(SpeedSAM PRIVATE ${SOURCES} ${HEADERS})
 
-# 设置包含目录
+# Set include directories
 target_include_directories(SpeedSAM 
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -69,7 +69,7 @@ target_include_directories(SpeedSAM
         ${OpenCV_INCLUDE_DIRS}
 )
 
-# 设置链接库
+# Set library dependencies
 target_link_libraries(SpeedSAM 
     PUBLIC
         ${OpenCV_LIBS}
@@ -140,21 +140,21 @@ file(WRITE ${CMAKE_BINARY_DIR}/run.bat
     ")\n"
 )
 
-# 设置CUDA编译选项
+# Set CUDA compilation options
 set_target_properties(SpeedSAM PROPERTIES 
     CUDA_SEPARABLE_COMPILATION ON
 )
 
-# 设置编译定义
+# Set compilation definitions
 target_compile_definitions(SpeedSAM PRIVATE 
     USE_TENSORRT 
     USE_CUDA
 )
 
-# 导出包含目录
+# Export include directories
 set(SPEED_SAM_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include CACHE INTERNAL "SPEED-SAM include directories")
 
-# 输出配置信息
+# Output configuration information
 message(STATUS "SPEED-SAM configuration:")
 message(STATUS "  CUDA libraries: ${CUDA_LIBRARIES}")
 message(STATUS "  TensorRT include: ${TENSORRT_INCLUDE_DIR}")
